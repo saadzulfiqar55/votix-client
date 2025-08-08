@@ -4,8 +4,8 @@ import Register from './pages/auth/Register';
 import Header from './components/Header';
 import AdminPanel from './pages/admin/AdminPanel';
 import HomePage from './components/HomePage';
-// import VotingPanel from './pages/voting/VotingPanel';
-// import ProtectedRoute from './routes/ProtectedRoute';
+import VotingPanel from './pages/vote/VotingPanel';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          {/* <Route
+          <Route
               path="/admin"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
@@ -32,7 +32,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/admin" element={<AdminPanel />} /> */}
+            <Route path="/admin" element={<AdminPanel />} />
         </Routes>
       </main>
     </>
