@@ -1,17 +1,19 @@
-import { useState } from 'react';
-import { registerUser } from '../../api/auth';
+// src/pages/auth/Register.jsx
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../../context/AuthContext';
 
 export default function Register() {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [error, setError] = useState('');
+  const { register } = useContext(AuthContext);
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'user' });
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
     try {
-      await registerUser(form);
-      window.location.href = '/login';
+      await register(form);
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     }

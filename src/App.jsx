@@ -1,11 +1,11 @@
-import { Routes, Route } from 'react-router-dom';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import Header from './components/Header';
-import AdminPanel from './pages/admin/AdminPanel';
-import HomePage from './components/HomePage';
-import VotingPanel from './pages/vote/VotingPanel';
-import ProtectedRoute from './routes/ProtectedRoute';
+import { Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import Header from "./components/Header";
+import HomePage from "./components/HomePage";
+import AdminPanel from "./pages/admin/AdminPanel";
+import ProtectedRoute from "./components/ProtectedRoute";
+import VotingPanel from "./pages/VotingPanel";
 
 function App() {
   return (
@@ -17,22 +17,22 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminPanel />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/vote"
-              element={
-                <ProtectedRoute allowedRoles={['user']}>
-                  <VotingPanel />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/admin" element={<AdminPanel />} />
+            path="/admin"
+            element={
+              <ProtectedRoute adminOnly>
+                <AdminPanel />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/vote"
+            element={
+              <ProtectedRoute>
+                <VotingPanel />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
     </>

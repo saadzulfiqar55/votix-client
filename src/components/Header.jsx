@@ -1,38 +1,60 @@
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+// src/components/Header.jsx
+import React, { useContext } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
-const Header = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+export default function Header() {
+  const { user, logout } = useContext(AuthContext);
+  const loc = useLocation();
 
-  const isAuthPage = location.pathname.startsWith('/register') || location.pathname.startsWith('/login');
-  if (isAuthPage) return null;
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
+  const isHomePage = loc.pathname === "/";
+  const isLoginPage = loc.pathname === "/login";
+  const isRegisterPage = loc.pathname === "/register";
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-4 shadow flex justify-between items-center">
-      <h1
-        onClick={() => navigate('/')}
-        className="text-2xl font-bold cursor-pointer"
-      >
-        🗳️ Votix
-      </h1>
+    <header className="bg-blue-600 text-white px-6 py-3 flex justify-between items-center">
+      <div className="text-xl font-bold cursor-pointer">🗳️ Votix</div>
 
-      {/* Only show logout button if NOT on auth pages */}
-      {!isLoggedIn && (
-        <button
-          onClick={handleLogout}
-          className="bg-white text-blue-600 px-4 py-1 rounded font-semibold shadow hover:bg-gray-100"
-        >
-          Logout
-        </button>
-      )}
+      <div className="flex items-center gap-4">
+        {/* If user is logged in */}
+        {user && (
+          <>
+            <span>Hi, {user.name || user.email}</span>
+            <button
+              onClick={logout}
+              className="bg-white text-blue-600 px-3 py-1 rounded"
+            >
+              Logout
+            </button>
+          </>
+        )}
+
+        {/* If user is NOT logged in */}
+        {!user && (
+          <>
+            {isHomePage && (
+              <>
+                <Link to="/login" className="hover:underline">
+                  Login
+                </Link>
+                <Link to="/register" className="hover:underline">
+                  Register
+                </Link>
+              </>
+            )}
+            {isLoginPage && (
+              <Link to="/register" className="hover:underline">
+                Register
+              </Link>
+            )}
+            {isRegisterPage && (
+              <Link to="/login" className="hover:underline">
+                Login
+              </Link>
+            )}
+          </>
+        )}
+      </div>
     </header>
   );
-};
-
-export default Header;
+}

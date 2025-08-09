@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import candidateData from '../data/candidates.json';
+import { createElection } from '../api/elections';
 
 const CreateElection = ({ onAdd }) => {
   const [formData, setFormData] = useState({
@@ -8,27 +8,34 @@ const CreateElection = ({ onAdd }) => {
     constituency: ''
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const filteredCandidates = candidateData.filter(
-      c => c.constituency === formData.constituency
-    );
-    const newElection = {
-      ...formData,
-      id: Date.now(),
-      candidates: filteredCandidates
-    };
-    onAdd(newElection);
-    setFormData({ title: '', description: '', constituency: '' });
+    setLoading(true);
+
+    try {
+      const { data } = await createElection(formData);
+      if (onAdd) onAdd(data);
+      setFormData({ title: '', description: '', constituency: '' });
+    } catch (error) {
+      console.error(error);
+      alert('Failed to create election');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded bg-white shadow">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 p-4 border rounded bg-white shadow"
+    >
       <h2 className="text-xl font-bold">Create Election</h2>
       <input
         type="text"
@@ -56,8 +63,12 @@ const CreateElection = ({ onAdd }) => {
         className="w-full p-2 border rounded"
         required
       />
-      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-        Add Election
+      <button
+        type="submit"
+        disabled={loading}
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        {loading ? 'Creating...' : 'Add Election'}
       </button>
     </form>
   );
