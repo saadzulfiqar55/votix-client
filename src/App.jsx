@@ -3,7 +3,6 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Header from "./components/Header";
 import HomePage from "./components/HomePage";
-import AdminPanel from "./pages/admin/AdminPanel";
 import ProtectedRoute from "./components/ProtectedRoute";
 import VotingPanel from "./pages/VotingPanel";
 
@@ -16,23 +15,15 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute adminOnly>
-                <AdminPanel />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
+          {/* <Route
             path="/vote"
             element={
               <ProtectedRoute>
                 <VotingPanel />
               </ProtectedRoute>
             }
-          />
+          /> */}
+          <Route path="/vote" element={<VotingPanel />} />
         </Routes>
       </main>
     </>
