@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     }
     try {
       const res = await getCurrentUser();
-      setUser(res.data);
+      setUser(res.data.user);
     } catch (err) {
       console.warn('Failed to load user:', err?.response?.data || err.message);
       localStorage.removeItem('token');

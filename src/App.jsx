@@ -15,15 +15,14 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          {/* <Route
+          <Route
             path="/vote"
             element={
               <ProtectedRoute>
                 <VotingPanel />
               </ProtectedRoute>
             }
-          /> */}
-          <Route path="/vote" element={<VotingPanel />} />
+          />
         </Routes>
       </main>
     </>
