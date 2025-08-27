@@ -26,7 +26,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-r from-blue-800 to-gray-800">
       <form
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-lg shadow-md w-96"
@@ -62,6 +62,7 @@ export default function Register() {
         <select
           value={form.constituency}
           onChange={(e) => setForm({ ...form, constituency: e.target.value })}
+          className="w-full mb-4 px-4 py-2 border rounded"
         >
           {Array.from({ length: 10 }, (_, i) => (
             <option key={i} value={`NA-${i + 1}`}>
