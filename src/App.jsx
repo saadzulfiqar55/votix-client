@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import HomePage from "./components/HomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import VotingPanel from "./pages/VotingPanel";
+import ResultsPage from "./pages/ResultsPage";
 
 function App() {
   return (
@@ -20,6 +21,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <VotingPanel />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/results"
+            element={
+              <ProtectedRoute>
+                <ResultsPage />
               </ProtectedRoute>
             }
           />

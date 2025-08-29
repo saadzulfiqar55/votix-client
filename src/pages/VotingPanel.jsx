@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ for redirect
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
@@ -8,10 +9,11 @@ export default function VotingPanel() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [voting, setVoting] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false); // ✅ track vote status
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log("Logged user:", user);
-  }, [user]);
+
+
 
   // ✅ Fetch constituency candidates
   const fetchCandidates = async () => {
@@ -51,6 +53,35 @@ export default function VotingPanel() {
   };
 
   // ✅ Vote for a candidate
+  // const handleVote = async (id) => {
+  //   if (hasVoted) return; // prevent double clicking
+  //   setVoting(true);
+  //   try {
+  //     const res = await axios.post(
+  //       "http://localhost:5000/api/elections/vote",
+  //       { candidateId: id },
+  //       {
+  //         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //       }
+  //     );
+  //     alert(res.data.message);
+  //     setHasVoted(true);
+
+  //     // ✅ Redirect to results page after successful vote
+  //     navigate("/results");
+  //   } catch (err) {
+  //     const msg = err.response?.data?.message || "Error submitting vote";
+  //     alert(msg);
+  //     if (msg.includes("already voted")) {
+  //       setHasVoted(true);
+  //       navigate("/results");
+  //     }
+  //   } finally {
+  //     setVoting(false);
+  //   }
+  // };
+
+
   const handleVote = async (id) => {
     setVoting(true);
     try {
@@ -62,7 +93,7 @@ export default function VotingPanel() {
         }
       );
       alert(res.data.message);
-      fetchResults(); // refresh results after voting
+      navigate("/results"); // ✅ Redirect to results page
     } catch (err) {
       alert(err.response?.data?.message || "Error submitting vote");
     } finally {
@@ -122,10 +153,13 @@ export default function VotingPanel() {
               <p className="text-gray-600">{c.party}</p>
               <button
                 onClick={() => handleVote(c._id)}
-                disabled={voting}
-                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition"
+                disabled={voting || hasVoted}
+                className={`mt-4 w-full py-2 px-4 rounded-lg transition ${hasVoted
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                  }`}
               >
-                {voting ? "Submitting..." : "Vote"}
+                {hasVoted ? "Already Voted" : voting ? "Submitting..." : "Vote"}
               </button>
             </div>
           ))}
