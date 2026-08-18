@@ -12,63 +12,79 @@ export default function Header() {
   const isLoginPage = loc.pathname === "/login";
   const isRegisterPage = loc.pathname === "/register";
 
-  // ✅ Handle logo click
   const handleLogoClick = () => {
     if (user) {
-      logout(); // clears user + token
+      logout();
     }
-    navigate("/"); // redirect to homepage
+    navigate("/");
   };
 
   return (
-    <header className="bg-black text-white px-6 py-5 flex justify-between items-center">
-      {/* Logo - clickable */}
-      <div
-        className="text-xl font-bold cursor-pointer"
-        onClick={handleLogoClick}
-      >
-        🗳️ Votix
-      </div>
+    <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 text-slate-100 px-6 py-4 transition-all">
+      <div className="max-w-6xl mx-auto flex justify-between items-center">
+        {/* Logo */}
+        <div
+          className="flex items-center gap-2 text-2xl font-extrabold cursor-pointer tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-400 bg-clip-text text-transparent hover:opacity-90 transition"
+          onClick={handleLogoClick}
+        >
+          <span className="text-xl">🗳️</span> Votix
+        </div>
 
-      <div className="flex items-center gap-4">
-        {/* If user is logged in */}
-        {user && (
-          <>
-            <span>Hi, {user.name || user.email}</span>
-            <button
-              onClick={logout}
-              className="bg-white text-blue-600 px-3 py-1 rounded"
-            >
-              Logout
-            </button>
-          </>
-        )}
+        {/* Navigation & Actions */}
+        <div className="flex items-center gap-4 text-sm font-medium">
+          {/* User Logged In */}
+          {user && (
+            <div className="flex items-center gap-4">
+              <span className="text-slate-300">
+                Hi, <strong className="text-white">{user.name || user.email}</strong>
+              </span>
+              <button
+                onClick={logout}
+                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-sm"
+              >
+                Logout
+              </button>
+            </div>
+          )}
 
-        {/* If user is NOT logged in */}
-        {!user && (
-          <>
-            {isHomePage && (
-              <>
-                <Link to="/login" className="hover:underline">
-                  Login
-                </Link>
-                <Link to="/register" className="hover:underline">
+          {/* User NOT Logged In */}
+          {!user && (
+            <div className="flex items-center gap-3">
+              {isHomePage && (
+                <>
+                  <Link
+                    to="/login"
+                    className="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
+              {isLoginPage && (
+                <Link
+                  to="/register"
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition"
+                >
                   Register
                 </Link>
-              </>
-            )}
-            {isLoginPage && (
-              <Link to="/register" className="hover:underline">
-                Register
-              </Link>
-            )}
-            {isRegisterPage && (
-              <Link to="/login" className="hover:underline">
-                Login
-              </Link>
-            )}
-          </>
-        )}
+              )}
+              {isRegisterPage && (
+                <Link
+                  to="/login"
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition"
+                >
+                  Login
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
