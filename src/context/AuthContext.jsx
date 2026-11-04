@@ -1,60 +1,59 @@
-// src/context/AuthContext.jsx
-import React, { createContext, useState, useEffect } from 'react';
-import { loginUser, registerUser, getCurrentUser } from '../api/auth';
-import { useNavigate } from 'react-router-dom';
+import { createContext, useState, useEffect, useContext } from "react";
+import { me, login as loginApi, register as registerApi, logout as logoutApi } from "../api/auth";
+import { setAuthToken } from "../api/client";
 
-export const AuthContext = createContext(null);
+// eslint-disable-next-line react-refresh/only-export-components
+export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
-  // Load user if token exists
-  const loadUser = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
+  const load = async () => {
+    setLoading(true);
     try {
-      const res = await getCurrentUser();
+      const res = await me();
       setUser(res.data.user);
-    } catch (err) {
-      console.warn('Failed to load user:', err?.response?.data || err.message);
-      localStorage.removeItem('token');
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
+  useEffect(() => { load(); }, []);
 
-  useEffect(() => { loadUser(); }, []);
-
-  const login = async (credentials) => {
-    const res = await loginUser(credentials);
-    if (res.data?.token) {
-      localStorage.setItem('token', res.data.token);
-      setUser(res.data.user);
-    }
-    navigate('/vote'); // Always go to voting panel
+  const login = async (data) => {
+    const res = await loginApi(data);
+    const token = res.data?.accessToken || res.data?.token;
+    if (token) setAuthToken(token);
+    await load();
+    return res;
   };
 
-  const register = async (payload) => {
-    await registerUser(payload);
-    navigate('/login');
+  const register = async (data) => {
+    const res = await registerApi(data);
+    const token = res.data?.accessToken || res.data?.token;
+    if (token) setAuthToken(token);
+    await load();
+    return res;
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
+  const logout = async () => {
+    await logoutApi();
     setUser(null);
-    navigate('/login');
+    setAuthToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, setUser, login, register, logout, loading, refresh: load }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 };

@@ -1,90 +1,113 @@
-// src/components/Header.jsx
-import React, { useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
-  const { user, logout } = useContext(AuthContext);
-  const loc = useLocation();
+  const { user, logout } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const isHomePage = loc.pathname === "/";
-  const isLoginPage = loc.pathname === "/login";
-  const isRegisterPage = loc.pathname === "/register";
+  const isActive = (path) => {
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.startsWith(path);
+  };
 
-  const handleLogoClick = () => {
-    if (user) {
-      logout();
-    }
+  const handleLogout = async () => {
+    await logout();
     navigate("/");
   };
 
+  const navLink = (path, label, exact = false) => {
+    const active = exact ? location.pathname === path : isActive(path);
+    return (
+      <Link
+        to={path}
+        className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+          active
+            ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+            : "text-slate-400 hover:text-white hover:bg-slate-700/30"
+        }`}
+      >
+        {label}
+      </Link>
+    );
+  };
+
+  const getRoleDashboard = () => {
+    if (!user) return null;
+    switch (user.role) {
+      case "super_admin":
+      case "election_admin":
+        return "/admin";
+      case "election_manager":
+        return "/manager";
+      case "polling_officer":
+        return "/officer";
+      default:
+        return "/dashboard";
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 text-slate-100 px-6 py-4 transition-all">
-      <div className="max-w-6xl mx-auto flex justify-between items-center">
-        {/* Logo */}
-        <div
-          className="flex items-center gap-2 text-2xl font-extrabold cursor-pointer tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-400 bg-clip-text text-transparent hover:opacity-90 transition"
-          onClick={handleLogoClick}
-        >
-          <span className="text-xl">🗳️</span> Votix
+    <header className="sticky top-0 z-50 glass-strong border-b border-slate-700/30">
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Link to={user ? getRoleDashboard() : "/"} className="flex items-center gap-2 group">
+            <span className="text-xl font-bold text-gradient">🗳 Votix</span>
+          </Link>
         </div>
 
-        {/* Navigation & Actions */}
-        <div className="flex items-center gap-4 text-sm font-medium">
-          {/* User Logged In */}
-          {user && (
-            <div className="flex items-center gap-4">
-              <span className="text-slate-300">
-                Hi, <strong className="text-white">{user.name || user.email}</strong>
-              </span>
-              <button
-                onClick={logout}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-sm"
-              >
-                Logout
-              </button>
-            </div>
-          )}
+        <nav className="flex items-center gap-1">
+          {user ? (
+            <>
+              {navLink(getRoleDashboard(), "Dashboard", true)}
+              {user.role === "voter" && navLink("/vote", "Vote")}
+              {navLink("/elections", "Elections")}
+              {navLink("/results", "Results")}
+              {(user.role === "super_admin" || user.role === "election_admin") && navLink("/admin", "Admin")}
+              {user.role === "election_manager" && navLink("/manager", "Manager")}
 
-          {/* User NOT Logged In */}
-          {!user && (
-            <div className="flex items-center gap-3">
-              {isHomePage && (
-                <>
-                  <Link
-                    to="/login"
-                    className="px-4 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition"
-                  >
-                    Register
-                  </Link>
-                </>
-              )}
-              {isLoginPage && (
-                <Link
-                  to="/register"
-                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition"
+              <div className="flex items-center gap-2 ml-4 pl-4 border-l border-slate-700/30">
+                <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
+                  <span className="text-indigo-300 text-sm font-medium">
+                    {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
+                  </span>
+                </div>
+                <div className="hidden md:block">
+                  <div className="text-white text-sm font-medium leading-tight">{user.name}</div>
+                  <div className="text-slate-500 text-[10px] leading-tight capitalize">{user.role?.replace(/_/g, " ")}</div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="px-3 py-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg text-xs transition-all"
                 >
+                  Logout
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              {navLink("/", "Home", true)}
+              {location.pathname === "/login" ? (
+                <Link to="/register" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-all">
                   Register
                 </Link>
-              )}
-              {isRegisterPage && (
-                <Link
-                  to="/login"
-                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition"
-                >
+              ) : location.pathname === "/register" ? (
+                <Link to="/login" className="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-white rounded-lg text-sm font-medium transition-all border border-slate-600/30">
                   Login
                 </Link>
+              ) : (
+                <div className="flex gap-2">
+                  <Link to="/login" className="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-white rounded-lg text-sm font-medium transition-all border border-slate-600/30">
+                    Login
+                  </Link>
+                  <Link to="/register" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-all">
+                    Register
+                  </Link>
+                </div>
               )}
-            </div>
+            </>
           )}
-        </div>
+        </nav>
       </div>
     </header>
   );

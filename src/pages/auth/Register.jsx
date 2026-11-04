@@ -1,167 +1,108 @@
-// src/pages/auth/Register.jsx
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import { getConstituencies } from "../../api/elections";
 
 export default function Register() {
   const { register } = useContext(AuthContext);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "user",
-    constituency: "NA-1",
-  });
+  const [form, setForm] = useState({ name: "", email: "", password: "", constituencyCode: "" });
+  const [constituencies, setConstituencies] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  React.useEffect(() => {
+    getConstituencies().then((r) => setConstituencies(r.data.constituencies || [])).catch(() => {});
+  }, []);
 
-  const handleSubmit = async (e) => {
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+  const submit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
       await register(form);
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Registration failed. Please try again."
-      );
+      setError(err.response?.data?.message || "Registration failed.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-slate-900 text-slate-100 flex items-center justify-center p-6 relative overflow-hidden selection:bg-indigo-500 selection:text-white">
-      {/* Background Accent Gradients */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-10 right-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 left-20 w-72 h-72 bg-blue-500/8 rounded-full blur-3xl" />
       </div>
 
-      <div className="w-full max-w-md">
-        {/* Card Container */}
-        <div className="bg-slate-800/40 border border-slate-700/50 backdrop-blur-md rounded-3xl p-8 shadow-2xl space-y-6">
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-500/10 text-2xl border border-indigo-500/20 mb-1">
-              ✨
-            </div>
-            <h2 className="text-2xl font-bold tracking-tight text-white">
-              Create a Votix Account
-            </h2>
-            <p className="text-sm text-slate-400">
-              Join the platform to cast votes and manage elections
-            </p>
-          </div>
+      <div className="w-full max-w-md animate-fade-in">
+        <div className="text-center mb-8">
+          <div className="text-4xl mb-3">🗳️</div>
+          <h1 className="text-3xl font-bold text-gradient">Join Votix</h1>
+          <p className="text-slate-400 mt-2 text-sm">Create your account and start voting securely</p>
+        </div>
 
-          {/* Error Alert */}
+        <form onSubmit={submit} className="glass rounded-2xl p-8 space-y-5 shadow-2xl shadow-black/20">
           {error && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
-              <span>⚠️</span>
-              <span>{error}</span>
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex items-center gap-2">
+              <span>⚠️</span> {error}
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                placeholder="John Doe"
-                value={form.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700/80 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-              />
-            </div>
-
-            {/* Email */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                Email Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                placeholder="name@example.com"
-                value={form.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700/80 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-              />
-            </div>
-
-            {/* Password */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700/80 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-              />
-            </div>
-
-            {/* Constituency Select */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                Constituency
-              </label>
-              <div className="relative">
-                <select
-                  name="constituency"
-                  value={form.constituency}
-                  onChange={(e) =>
-                    setForm({ ...form, constituency: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700/80 text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition appearance-none cursor-pointer"
-                >
-                  {Array.from({ length: 10 }, (_, i) => (
-                    <option key={i} value={`NA-${i + 1}`} className="bg-slate-800 text-white">
-                      NA-{i + 1}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
-                  ▼
-                </div>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-medium shadow-lg shadow-indigo-600/25 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-            >
-              {loading ? "Registering..." : "Create Account"}
-            </button>
-          </form>
-
-          {/* Footer Link */}
-          <div className="text-center pt-2 text-sm text-slate-400">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-medium text-indigo-400 hover:text-indigo-300 underline underline-offset-4 transition"
-            >
-              Sign in here
-            </Link>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Full Name</label>
+            <input
+              className="w-full px-4 py-3 rounded-xl bg-slate-900/70 border border-slate-700/60 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20 transition"
+              placeholder="John Doe" value={form.name} onChange={set("name")} required
+            />
           </div>
-        </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Email</label>
+            <input
+              className="w-full px-4 py-3 rounded-xl bg-slate-900/70 border border-slate-700/60 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20 transition"
+              type="email" placeholder="you@example.com" value={form.email} onChange={set("email")} required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
+            <input
+              className="w-full px-4 py-3 rounded-xl bg-slate-900/70 border border-slate-700/60 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20 transition"
+              type="password" placeholder="Min 8 chars, upper, lower, number" value={form.password} onChange={set("password")} required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Constituency</label>
+            <select
+              className="w-full px-4 py-3 rounded-xl bg-slate-900/70 border border-slate-700/60 text-white focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20 transition appearance-none"
+              value={form.constituencyCode} onChange={set("constituencyCode")} required
+            >
+              <option value="">Select your constituency</option>
+              {constituencies.map((c) => (
+                <option key={c.id} value={c.code}>{c.code} — {c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-medium text-white disabled:opacity-50 shadow-lg shadow-indigo-600/20 transition-all hover:shadow-indigo-500/30"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                Creating…
+              </span>
+            ) : "Create Account"}
+          </button>
+
+          <div className="text-sm text-slate-400 text-center">
+            Already have an account? <Link to="/login" className="text-indigo-400 hover:text-indigo-300 transition">Sign in →</Link>
+          </div>
+        </form>
       </div>
     </div>
   );

@@ -1,19 +1,18 @@
-// src/api/auth.js
-import axios from 'axios';
+import api, { setAuthToken } from "./client";
 
-const API = axios.create({
-  baseURL: 'http://localhost:5000/api', // <- backend base
+export const register = (data) => api.post("/api/auth/register", data);
+export const login = (data) => api.post("/api/auth/login", data).then((res) => {
+  const token = res.data?.accessToken || res.data?.token;
+  if (token) setAuthToken(token);
+  return res;
 });
-
-// attach token automatically (if exists)
-API.interceptors.request.use((cfg) => {
-  const token = localStorage.getItem('token');
-  if (token) cfg.headers.Authorization = `Bearer ${token}`;
-  return cfg;
-}, (err) => Promise.reject(err));
-
-export const registerUser = (data) => API.post('/auth/register', data);
-export const loginUser = (data) => API.post('/auth/login', data);
-export const getCurrentUser = () => API.get('/auth/me');
-
-export default API;
+export const logout = () => api.post("/api/auth/logout");
+export const refreshToken = () => api.post("/api/auth/refresh");
+export const me = () => api.get("/api/auth/me");
+export const verifyEmail = (token) => api.post("/api/auth/verify-email", { token });
+export const forgotPassword = (email) => api.post("/api/auth/forgot-password", { email });
+export const resetPassword = (token, password) => api.post("/api/auth/reset-password", { token, password });
+export const getUsers = () => api.get("/api/admin/users");
+export const updateUser = (id, data) => api.put(`/api/admin/users/${id}`, data);
+export const deleteUser = (id) => api.delete(`/api/admin/users/${id}`);
+export const getAuditLogs = () => api.get("/api/admin/audit-logs");

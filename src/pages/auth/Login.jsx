@@ -1,113 +1,85 @@
-// src/pages/auth/Login.jsx
-import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext';
+import React, { useState, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 export default function Login() {
   const { login } = useContext(AuthContext);
-  const [form, setForm] = useState({ email: '', password: '' });
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      await login({ email: form.email, password: form.password });
+      await login({ email, password });
+      navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      const msg = err.response?.data?.message || "Login failed.";
+      setError(msg);
+      if (/verify/i.test(msg)) navigate(`/verify-email?email=${encodeURIComponent(email)}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-73px)] bg-slate-900 text-slate-100 flex items-center justify-center p-6 relative overflow-hidden selection:bg-indigo-500 selection:text-white">
-      {/* Background Accent Gradients */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/8 rounded-full blur-3xl" />
       </div>
 
-      <div className="w-full max-w-md">
-        {/* Card Container */}
-        <div className="bg-slate-800/40 border border-slate-700/50 backdrop-blur-md rounded-3xl p-8 shadow-2xl space-y-6">
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-500/10 text-2xl border border-indigo-500/20 mb-1">
-              🗳️
-            </div>
-            <h2 className="text-2xl font-bold tracking-tight text-white">
-              Welcome back to Votix
-            </h2>
-            <p className="text-sm text-slate-400">
-              Enter your account credentials to access elections
-            </p>
-          </div>
+      <div className="w-full max-w-md animate-fade-in">
+        <div className="text-center mb-8">
+          <div className="text-4xl mb-3">🗳️</div>
+          <h1 className="text-3xl font-bold text-gradient">Welcome back</h1>
+          <p className="text-slate-400 mt-2 text-sm">Sign in to access your voting dashboard</p>
+        </div>
 
-          {/* Error Message */}
+        <form onSubmit={submit} className="glass rounded-2xl p-8 space-y-5 shadow-2xl shadow-black/20">
           {error && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
-              <span>⚠️</span>
-              <span>{error}</span>
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex items-center gap-2">
+              <span>⚠️</span> {error}
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                Email Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                placeholder="name@example.com"
-                value={form.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700/80 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700/80 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-medium shadow-lg shadow-indigo-600/25 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-            >
-              {loading ? 'Authenticating...' : 'Sign In'}
-            </button>
-          </form>
-
-          {/* Footer Link */}
-          <div className="text-center pt-2 text-sm text-slate-400">
-            Don't have an account?{' '}
-            <Link
-              to="/register"
-              className="font-medium text-indigo-400 hover:text-indigo-300 underline underline-offset-4 transition"
-            >
-              Create one here
-            </Link>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Email</label>
+            <input
+              className="w-full px-4 py-3 rounded-xl bg-slate-900/70 border border-slate-700/60 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20 transition"
+              type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required
+            />
           </div>
-        </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
+            <input
+              className="w-full px-4 py-3 rounded-xl bg-slate-900/70 border border-slate-700/60 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/20 transition"
+              type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required
+            />
+          </div>
+
+          <button
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-medium text-white disabled:opacity-50 shadow-lg shadow-indigo-600/20 transition-all hover:shadow-indigo-500/30"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                Signing in…
+              </span>
+            ) : "Sign in"}
+          </button>
+
+          <div className="flex justify-between text-sm">
+            <Link to="/forgot-password" className="text-slate-400 hover:text-indigo-400 transition">Forgot password?</Link>
+            <Link to="/register" className="text-indigo-400 hover:text-indigo-300 transition">Create account →</Link>
+          </div>
+        </form>
       </div>
     </div>
   );
